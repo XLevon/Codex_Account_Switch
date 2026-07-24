@@ -123,18 +123,22 @@ fn normalize_short_version(version: &str) -> Option<String> {
 
 #[cfg(any(target_os = "macos", target_os = "linux"))]
 fn fetch_update_json(url: &str) -> AppResult<String> {
-    let output = Command::new("curl")
-        .args([
-            "--fail",
-            "--location",
-            "--silent",
-            "--show-error",
-            "--max-time",
-            "12",
-            "--user-agent",
-            UPDATE_USER_AGENT,
-            url,
-        ])
+    let mut command = Command::new("curl");
+    command.args([
+        "--fail",
+        "--location",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "12",
+        "--user-agent",
+        UPDATE_USER_AGENT,
+        url,
+    ]);
+    // macOS：注入应用层代理 env，curl 默认会读 HTTPS_PROXY/ALL_PROXY。
+    // Linux 不启用应用层代理（无 ProxyState 配置 UI），此处为 no-op。
+    crate::shared::proxy::apply_proxy_env(&mut command);
+    let output = command
         .output()
         .map_err(|error| {
             AppError::new(

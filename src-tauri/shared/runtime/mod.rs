@@ -9,6 +9,7 @@ pub mod metadata;
 pub mod paths;
 pub mod process_lock;
 pub mod profiles;
+pub mod proxy;
 pub mod profiles_index;
 pub mod quota_cache;
 pub mod quota_routing;
